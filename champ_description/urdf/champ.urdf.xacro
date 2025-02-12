@@ -53,6 +53,7 @@
         base_name="base_link" 
         base_length="${base_x_length}"
         base_height="${base_z_length}"
+        ssafyname="champ"
     />
 
     <xacro:champ_leg leg="lf"/>

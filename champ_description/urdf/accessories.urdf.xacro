@@ -1,11 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-    <xacro:macro name="accessories" params="base_name base_length base_height  " >
+    <xacro:macro name="accessories" params="base_name base_length base_height ssafyname" >
 
-        <xacro:include filename="$(find champ_description)/urdf/hokuyo_utm30lx.urdf.xacro" />
+        <!-- <xacro:include filename="$(find champ_description)/urdf/hokuyo_utm30lx.urdf.xacro" /> -->
         <xacro:include filename="$(find champ_description)/urdf/asus_camera.urdf.xacro" />
+        <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
         
-        <xacro:hokuyo_utm30lx 
+        <!-- <xacro:VLP-16 parent="${base_name}" name="${ssafyname}" topic="velodyne_points" hz="10" samples="1024" gpu="false" lasers="16" max_range="100">
+            <origin xyz="0 0 ${base_height+10}" rpy="0 0 0" />
+        </xacro:VLP-16> -->
+
+        <!-- <xacro:hokuyo_utm30lx 
             name="hokuyo" 
             parent="${base_name}" 
             ros_topic="scan" 
@@ -14,19 +19,19 @@
             min_angle="130" 
             max_angle="-130" >
             <origin xyz="0.0 0.0 ${base_height / 2 + 0.04}" rpy="0 0 0"/>
-        </xacro:hokuyo_utm30lx>
+        </xacro:hokuyo_utm30lx> -->
         
         <xacro:asus_camera 
             parent="${base_name}" 
             name="front_camera"
-            robotname="champ">
+            robotname="${ssafyname}">
             <origin xyz="${base_length / 2} 0.0 -${base_height / 2 + 0.01}" rpy="0 0 0"/>
         </xacro:asus_camera>
 
         <xacro:asus_camera 
             parent="${base_name}" 
             name="rear_camera"
-            robotname="champ">
+            robotname="${ssafyname}">
             <origin xyz="${base_length / 2} 0.0 -${base_height / 2 + 0.01}" rpy="0 0 1.570"/>
         </xacro:asus_camera>
 
@@ -39,53 +44,64 @@
             
         </link>
 
+        <link name ="gps_link">
+            <inertial>
+                <mass value="0.001"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <inertia ixx="1e-09" ixy="0.0" ixz="0.0" iyy="1e-09" iyz="0.0" izz="1e-09"/>
+            </inertial>
+        </link>
+
+    
         <joint name="imu_joint" type="fixed">
             <parent link="${base_name}" />
             <child link="imu_link" />
         </joint>
 
+        <joint name="gps_joint" type="fixed">
+            <parent link="${base_name}" />
+            <child link="gps_link" />
+        </joint>
 
         <gazebo reference="imu_link">
-                <sensor name="imu_controller" type="imu">
-                    <always_on>true</always_on>
-                    <update_rate>100</update_rate>
-                    <plugin name="gazebo_ros_imu_sensor" filename="libgazebo_ros_imu_sensor.so">
-                        <ros>
-                            <namespace>champ</namespace>
-                            <argument>~/out:=imu</argument>
-                        </ros>
-                        <!-- <updateRate>50.0</updateRate>
-                        <bodyName>imu_link</bodyName>
-                        <topicName>imu/data</topicName>
-                        <accelDrift>0.005 0.005 0.005</accelDrift>
-                        <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
-                        <rateDrift>0.005 0.005 0.005 </rateDrift>
-                        <rateGaussianNoise>0.005 0.005 0.005 </rateGaussianNoise>
-                        <headingDrift>0.005</headingDrift>
-                        <headingGaussianNoise>0.005</headingGaussianNoise> -->
-                    </plugin>
-                </sensor>
-                <sensor name="champ_gps" type="gps">
-                    <!-- 센서 기본 설정 -->
-                    <always_on>true</always_on>
-                    <update_rate>8</update_rate> <!-- 초당 8회 업데이트 예시 -->
-
-                    <!-- Gazebo ROS GPS 플러그인 -->
-                    <plugin name="my_gps_plugin" filename="libgazebo_ros_gps_sensor.so">
+            <sensor name="imu_controller" type="imu">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <plugin name="gazebo_ros_imu_sensor" filename="libgazebo_ros_imu_sensor.so">
                     <ros>
-                        <!-- 네임스페이스 설정 -->
-                        <namespace>champ</namespace>
-                        <remapping>~/out:=gps</remapping>
+                        <namespace>${ssafyname}</namespace>
+                        <argument>~/out:=imu</argument>
                     </ros>
-                    <!-- 아래 항목들은 플러그인에 따라 다르나, 일반적으로 설정 -->
-                    </plugin>
-                </sensor>
-            </gazebo>
+                    <!-- <updateRate>50.0</updateRate>
+                    <bodyName>imu_link</bodyName>
+                    <topicName>imu/data</topicName>
+                    <accelDrift>0.005 0.005 0.005</accelDrift>
+                    <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
+                    <rateDrift>0.005 0.005 0.005 </rateDrift>
+                    <rateGaussianNoise>0.005 0.005 0.005 </rateGaussianNoise>
+                    <headingDrift>0.005</headingDrift>
+                    <headingGaussianNoise>0.005</headingGaussianNoise> -->
+                </plugin>
+            </sensor>
+        </gazebo>
+        <gazebo reference="gps_link">
+            <sensor name="gps_controller" type="gps">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <plugin name="gazebo_ros_gps" filename="libgazebo_ros_gps.so">
+                    <ros>
+                        <namespace>${ssafyname}</namespace>
+                        <argument>~/fix:=fix</argument>
+                    </ros>
+                </plugin>
+            </sensor>
+        </gazebo>
 
         <!-- original code -->
-        <!-- <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
-        <xacro:VLP-16 parent="${base_name}" name="velodyne" topic="velodyne_points" hz="10" samples="1024" gpu="false" lasers="16" max_range="100">
-            <origin xyz="0 0 ${base_height / 2}" rpy="0 0 0" />
+            <!-- <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+        
+        <xacro:VLP-16 parent="${base_name}" name="my3dlidar" topic="velodyne_points" hz="10" samples="1024" gpu="false" lasers="16" max_range="100">
+            <origin xyz="0 0 ${base_height}" rpy="0 0 0" />
         </xacro:VLP-16> -->
 
         <!-- <xacro:include filename="$(find champ_arm_description)/urdf/champ_arm.urdf.xacro" />
