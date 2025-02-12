@@ -80,7 +80,7 @@
      The asus_camera macro only adds the model, and also adds
      the openni gazebo plugin.
     -->
-    <xacro:macro name="asus_camera" params="name parent *origin">
+    <xacro:macro name="asus_camera" params="name robotname parent *origin">
       <xacro:asus_camera_model name="${name}" parent="${parent}">
         <xacro:insert_block name="origin" />
       </xacro:asus_camera_model>
@@ -111,8 +111,8 @@
           
           <plugin name="${name}_camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-              <!-- <namespace>custom_ns</namespace> -->
-              <argument>custom_camera/image_raw:=${name}/rgb/image_raw</argument>
+              <namespace>${robotname}</namespace>
+              <argument>custom_camera/image_raw:=/${name}/rgb/image_raw</argument>
               <argument>custom_camera/image_depth:=${name}/depth/image_raw</argument>
               <argument>custom_camera/camera_info:=custom_camera/custom_info_raw</argument>
               <argument>custom_camera/camera_info_depth:=${name}/depth/camera_info</argument>

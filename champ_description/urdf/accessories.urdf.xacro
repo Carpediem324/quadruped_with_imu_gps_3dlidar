@@ -18,13 +18,15 @@
         
         <xacro:asus_camera 
             parent="${base_name}" 
-            name="champ_front">
+            name="front_camera"
+            robotname="champ">
             <origin xyz="${base_length / 2} 0.0 -${base_height / 2 + 0.01}" rpy="0 0 0"/>
         </xacro:asus_camera>
 
         <xacro:asus_camera 
             parent="${base_name}" 
-            name="champ_rear">
+            name="rear_camera"
+            robotname="champ">
             <origin xyz="${base_length / 2} 0.0 -${base_height / 2 + 0.01}" rpy="0 0 1.570"/>
         </xacro:asus_camera>
 
